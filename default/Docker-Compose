@@ -1,0 +1,75 @@
+node {
+
+
+
+stage('GitCheckOut') {
+
+git branch: 'main', credentialisId: '01', url: 'https://github.com/codinghumanity2347/handson'
+
+}
+
+
+
+def project_path = "petclinic-zidi"
+
+
+
+dir(project_path){
+
+
+
+stage('Maven Clean') {
+
+sh 'mvn clean'
+
+}
+
+
+
+stage('Maven Compile') {
+
+sh 'mvn compile'
+
+}
+
+
+
+stage('Maven test') {
+
+sh 'mvn test'
+
+}
+
+
+
+stage('Maven pkg') {
+
+sh 'mvn package'
+
+}
+
+stage('Archive Artifacts') {
+
+archive 'target/*.war'    
+
+}
+
+
+
+stage('Deployment - PreProd') {
+
+sh 'docker-compose up -d --build'
+
+}
+
+
+
+stage('Deployment - Stage'){
+
+ deploy adapters: [tomcat8(credentialsId: '02', path: '', url: 'http://ucplc91343dns.eastus2.cloudapp.azure.com:8080/')], contextPath: 'petclinic', onFailure: false, war: 'petclinic-zidi/target/petclinic.war'
+}
+
+}
+ 
+
+}
